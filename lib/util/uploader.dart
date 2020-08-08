@@ -10,8 +10,12 @@ class UploadFiles {
     final bname = DateTime.now().toString() + basename(file.path);
 
     print(bname);
-    FormData formData = new FormData.from(
-        {type == "video" ? "video" : "video": new UploadFileInfo(file, bname)});
+    FormData formData = new FormData.fromMap({
+      type == "video" ? "video" : "video":
+          MultipartFile.fromFileSync(file.path, filename: bname)
+    });
+
+    print(formData);
 
     Response res = await dio.post(
         "${_connect.baseUrl}/request.php?action=upload-video",

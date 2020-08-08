@@ -36,8 +36,8 @@ class CameraFuctions {
 // data:image/png;base64
     // print(extension(image.path));
     state.didChange(image.path);
-
     Navigator.pop(context);
+    return image.path;
   }
 
   Future videoCamera(FormFieldState<dynamic> state, context) async {

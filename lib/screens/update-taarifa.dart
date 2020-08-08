@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:custom_chewie/custom_chewie.dart';
+import 'package:chewie/chewie.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:gradient_app_bar/gradient_app_bar.dart';
@@ -11,6 +11,7 @@ import 'package:justine/util/camera.dart';
 import 'package:justine/util/convertors.dart';
 import 'package:video_player/video_player.dart';
 import 'mikoaselect.dart';
+import 'video-widget.dart';
 
 class UpdateTaarifaForm extends StatefulWidget {
   final Map<String, dynamic> formData;
@@ -46,11 +47,9 @@ class _UpdateTaarifaFormState extends State<UpdateTaarifaForm> {
   TextStyle fontInputStyle = TextStyle(
       color: Color(0XFF294f36), fontSize: 14, fontWeight: FontWeight.w700);
   TextStyle inputHintStyle = TextStyle(color: Color(0XFF294f36), fontSize: 12);
-  VideoPlayerController videoCtr;
 
   @override
   void dispose() {
-    videoCtr.dispose();
     super.dispose();
   }
 
@@ -71,12 +70,6 @@ class _UpdateTaarifaFormState extends State<UpdateTaarifaForm> {
       _controllerPicture.text = widget.formData['form']['picha'];
       _controllerVideo.text = widget.formData['form']['video'];
       print(widget.formData['form']);
-      videoCtr = widget.formData['form']['video']
-              .toString()
-              .startsWith('https:')
-          ? new VideoPlayerController.network(widget.formData['form']['video'])
-          : new VideoPlayerController.file(
-              File(widget.formData['form']['video']));
     });
   }
 
@@ -246,11 +239,6 @@ class _UpdateTaarifaFormState extends State<UpdateTaarifaForm> {
                     onTap: () async {
                       String path = await camFunc.videoCamera(state, context);
                       setState(() {
-                        if (videoCtr != null) {
-                          videoCtr.pause();
-                        }
-                        videoCtr = VideoPlayerController.file(File(path));
-
                         _controllerVideo.text = path;
                         Navigator.pop(context);
                       });
@@ -276,8 +264,6 @@ class _UpdateTaarifaFormState extends State<UpdateTaarifaForm> {
                     onTap: () async {
                       String path = await camFunc.videoGallery(state, context);
                       setState(() {
-                        videoCtr = VideoPlayerController.file(File(path));
-
                         _controllerVideo.text = path;
                         Navigator.pop(context);
                       });
@@ -792,26 +778,8 @@ class _UpdateTaarifaFormState extends State<UpdateTaarifaForm> {
                         _controllerVideo.text.length > 6
                             ? Container(
                                 padding: EdgeInsets.only(top: 10),
-                                child: Chewie(
-                                  videoCtr,
-                                  autoInitialize: true,
-                                  // autoPlay: true,
-                                  // looping: false,
-
-                                  // Try playing around with some of these other options:
-                                  // showControls: false,
-                                  materialProgressColors:
-                                      new ChewieProgressColors(
-                                    playedColor: Colors.red,
-                                    handleColor: Colors.blue,
-                                    backgroundColor: Colors.grey,
-                                    bufferedColor: Colors.lightGreen,
-                                  ),
-                                  placeholder: new Container(
-                                    color: Colors.grey,
-                                  ),
-                                  // autoInitialize: true,
-                                ),
+                                child: VideoWidget(
+                                    controllerVideo: _controllerVideo),
                               )
                             : Container(),
                         FormField(

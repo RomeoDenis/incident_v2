@@ -12,12 +12,11 @@ description: A new Flutter project.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 version: 1.0.0+8
-
 environment:
-  sdk: ">=2.2.2 <3.0.0"
+  sdk: '>=2.2.2 <3.0.0'
 
 dependencies:
-  flutter_launcher_icons: "^0.7.0"
+  flutter_launcher_icons: '^0.7.0'
   gradient_app_bar:
   flushbar: ^1.10.4
   # cloud_firestore:
@@ -28,8 +27,10 @@ dependencies:
   image_picker: ^0.6.7+4
   video_player: any
   intl: any
-  # chewie: any
-  custom_chewie: ^0.7.0
+  chewie: 0.9.10
+  # custom_chewie: ^0.7.0
+  video_thumbnail: 0.2.2
+
   intro_slider:
   async_resource:
   url_launcher:
@@ -37,7 +38,7 @@ dependencies:
   connectivity:
 
   # http: ^0.12.0+2
-  dio: ^3.0.9
+  dio:
   flutter:
     sdk: flutter
 
@@ -69,8 +70,8 @@ flutter_icons:
   # ios: true
   android: true
   # image_path_ios: "assets/launcher/icon.png"
-  image_path: "assets/launcher/icon.png"
-  
+  image_path:
+    'assets/launcher/icon.png'
     # adaptive_icon_background: "assets/launcher/background.png"
     # adaptive_icon_foreground: "assets/launcher/foreground.png"
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -96,4 +97,3 @@ flutter_icons:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
-  

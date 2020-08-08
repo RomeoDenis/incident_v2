@@ -18,19 +18,11 @@ class Functions {
     print(value.length);
     String patttern = r'(^(?:[+0]9)?[0-9]{10,10}$)';
     RegExp regExp = new RegExp(patttern);
-    // print(regExp.hasMatch(value));
-    // if (value.length == 0) {
-    //   print('return null');
-    //   return null;
-    // } else if (!regExp.hasMatch(value)) {
-    //   print('return f message');
-    //   return 'Please enter valid mobile number';
-    // }
-    // print('return fail message');
-    //val.isEmpty ? 'value is required' : null,
-    if (value.isEmpty)
-      return 'Tafadhali jaza namba ya simu';
-    else if (!regExp.hasMatch(value))
+
+    if (value.isEmpty) return null;
+    if (value.length != 10) {
+      return 'Mobile Number must be of 10 digit';
+    } else if (!regExp.hasMatch(value))
       return 'Namba ya simu inatakiwa iwe(0784xxxxxx)';
     else
       return null;

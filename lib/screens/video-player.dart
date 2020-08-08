@@ -1,29 +1,28 @@
+import 'dart:io';
+
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
-class VideoComp extends StatefulWidget {
-  // This will contain the URL/asset path which we want to play
-  final VideoPlayerController videoPlayerController;
-  final bool looping;
-
-  VideoComp({
-    @required this.videoPlayerController,
-    this.looping,
-    Key key,
-  }) : super(key: key);
+class VideoPlayWidget extends StatefulWidget {
+  String video;
+  VideoPlayWidget({Key key, this.video}) : super(key: key);
 
   @override
-  _VideoCompState createState() => _VideoCompState();
+  _VideoPlayState createState() => _VideoPlayState();
 }
 
-class _VideoCompState extends State<VideoComp> {
-  var chewieController;
+class _VideoPlayState extends State<VideoPlayWidget> {
   VideoPlayerController videoCtr;
+  var chewieController;
   @override
   void initState() {
     super.initState();
-    // Wrapper on top of the videoPlayerController
+    videoCtr = widget.video.toString().startsWith('https:') ||
+            widget.video.toString().startsWith('http:')
+        ? new VideoPlayerController.network(widget.video)
+        : new VideoPlayerController.file(File(widget.video));
+
     chewieController = ChewieController(
       videoPlayerController: videoCtr,
       aspectRatio: 3 / 2,
@@ -47,19 +46,16 @@ class _VideoCompState extends State<VideoComp> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Chewie(
-        controller: chewieController,
-      ),
-    );
+  void dispose() {
+    videoCtr.dispose();
+    super.dispose();
   }
 
   @override
-  void dispose() {
-    super.dispose();
-    // IMPORTANT to dispose of all the used resources
-    widget.videoPlayerController.dispose();
+  Widget build(BuildContext context) {
+    return Container(
+        child: Chewie(
+      controller: chewieController,
+    ));
   }
 }

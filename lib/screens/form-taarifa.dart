@@ -1,21 +1,26 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 // import 'package:chewie/chewie.dart';
-import 'package:custom_chewie/custom_chewie.dart';
+import 'package:chewie/chewie.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:gradient_app_bar/gradient_app_bar.dart';
 import 'package:justine/components/dialog-loading.dart';
 import 'package:justine/db/form-db.dart';
+import 'package:justine/screens/video-player.dart';
 import 'package:justine/services/send-taarifa.dart';
 // import 'package:justine/components/video-comp.dart';
 // import 'package:justine/components/video-comp.dart';
 import 'package:justine/util/camera.dart';
 import 'package:justine/util/convertors.dart';
+import 'package:justine/util/funcs.dart';
 import 'package:justine/util/my-location.dart';
 import 'package:location/location.dart';
 import 'package:video_player/video_player.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
 import 'mikoaselect.dart';
+import 'video-widget.dart';
 
 class TaarifaForm extends StatefulWidget {
   TaarifaForm({Key key}) : super(key: key);
@@ -47,6 +52,11 @@ class _TaarifaFormState extends State<TaarifaForm> {
   bool _Wilayaerror = false;
   bool _Wadierror = false;
   bool _Ainaerror = false;
+
+  bool _Pictureerror = false;
+
+  bool _Phoneerror = false;
+
   Color bborderColor = Color(0XFF294f36).withOpacity(0.7);
   Color fontColor = Color(0XFF294f36);
   Color iconColorGreen = Color(0XFF294f36);
@@ -55,6 +65,7 @@ class _TaarifaFormState extends State<TaarifaForm> {
   TextStyle inputHintStyle = TextStyle(color: Color(0XFF294f36), fontSize: 12);
   // TextStyle inputHintStyle = TextStyle(color: Colors.white40, fontSize: 14);
   VideoPlayerController videoCtr;
+  var chewieController;
   LocationData currentLocation;
   var subscription;
   @override
@@ -72,6 +83,27 @@ class _TaarifaFormState extends State<TaarifaForm> {
     initLoc();
 
     videoCtr = new VideoPlayerController.file(File(''));
+    chewieController = ChewieController(
+      videoPlayerController: videoCtr,
+      aspectRatio: 3 / 2,
+      autoPlay: true,
+      autoInitialize: true,
+      // autoPlay: true,
+      looping: false,
+
+      // Try playing around with some of these other options:
+      showControls: false,
+      materialProgressColors: new ChewieProgressColors(
+        playedColor: Colors.red,
+        handleColor: Colors.blue,
+        backgroundColor: Colors.grey,
+        bufferedColor: Colors.lightGreen,
+      ),
+      placeholder: new Container(
+        color: Colors.grey,
+      ),
+      // autoInitialize: true,
+    );
   }
 
   initLoc() async {
@@ -111,6 +143,7 @@ class _TaarifaFormState extends State<TaarifaForm> {
 
   Future submitForm() async {
     final FormState form = _formKey.currentState;
+    print(_controllerPicture.text);
     setState(() {
       if (_controllerMkoa.text.isEmpty) {
         _Mkoaerror = true;
@@ -132,6 +165,16 @@ class _TaarifaFormState extends State<TaarifaForm> {
       } else {
         _Ainaerror = false;
       }
+      if (_controllerPhone.text.isEmpty) {
+        _Phoneerror = true;
+      } else {
+        _Phoneerror = false;
+      }
+      if (_controllerPicture.text.isEmpty) {
+        _Pictureerror = true;
+      } else {
+        _Pictureerror = false;
+      }
     });
     await initLoc();
     print(currentLocation);
@@ -149,10 +192,13 @@ class _TaarifaFormState extends State<TaarifaForm> {
         !(_controllerMkoa.text.isNotEmpty &&
             _controllerWilaya.text.isNotEmpty &&
             _controllerWilaya.text.isNotEmpty &&
-            _controllerAina.text.isNotEmpty)) {
+            _controllerAina.text.isNotEmpty &&
+            _controllerPhone.text.isNotEmpty &&
+            _controllerPicture.text.isNotEmpty)) {
       Flushbar(
         title: "Kuna Tatizo",
-        message: 'Hakikisha sehemu zote zimejazwa bila kusahau picha! Kazi yako na Video sio lazima vijazwe',
+        message:
+            'Hakikisha sehemu zote zimejazwa bila kusahau picha! Kazi yako na Video sio lazima vijazwe',
         duration: Duration(seconds: 6),
       )..show(context);
     } else {
@@ -187,6 +233,8 @@ class _TaarifaFormState extends State<TaarifaForm> {
         }
       };
       print(data['form']);
+      print('-----------test -----------');
+
       // _convertor.toBase64(File(_controllerPicture.text.toString()));
       _formdb.storeForm(data).then((v) {
         print(v);
@@ -263,7 +311,15 @@ class _TaarifaFormState extends State<TaarifaForm> {
                         Text('Chagua Kwenye Faili')
                       ],
                     ),
-                    onTap: () => {CameraFuctions.openGallery(state, context)},
+                    onTap: () async {
+                      String path =
+                          await CameraFuctions.openGallery(state, context);
+
+                      setState(() {
+                        _controllerPicture.text = path;
+                        // Navigator.pop(context);
+                      });
+                    },
                   ),
                 ],
               ),
@@ -485,7 +541,7 @@ class _TaarifaFormState extends State<TaarifaForm> {
                                 builder: (context) => MikoaDialog(
                                     dialogType: 'wadi',
                                     reginalId: reginalId,
-                                    districtId:districtId,
+                                    districtId: districtId,
                                     onSubmit: (re) => setDialogResult(
                                         'wadi', _controllerWadi, re)));
                           }
@@ -628,7 +684,9 @@ class _TaarifaFormState extends State<TaarifaForm> {
                   Container(
                     decoration: BoxDecoration(
                         border: Border(
-                            bottom: BorderSide(color: bborderColor, width: 2))),
+                            bottom: BorderSide(
+                                color: _Phoneerror ? Colors.red : bborderColor,
+                                width: 2))),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
@@ -646,8 +704,6 @@ class _TaarifaFormState extends State<TaarifaForm> {
                                 hintText: 'Mf:0784XXXXXX'),
                             style: inputHintStyle,
                             validator: Functions().validateMobile,
-
-
                             onSaved: (val) => {}),
                       ],
                     ),
@@ -655,7 +711,7 @@ class _TaarifaFormState extends State<TaarifaForm> {
                   SizedBox(
                     height: 30,
                   ),
-                   Container(
+                  Container(
                     decoration: BoxDecoration(
                         border: Border(
                             bottom: BorderSide(color: bborderColor, width: 2))),
@@ -704,7 +760,7 @@ class _TaarifaFormState extends State<TaarifaForm> {
                               });
                             },
                             validator: (val) =>
-                            val.isEmpty ? 'Picture  is required' : null,
+                                val.isEmpty ? 'Picture  is required' : null,
                             builder: (FormFieldState<dynamic> state) {
                               return InkWell(
                                   onTap: () => imageSourceOption(state),
@@ -712,7 +768,14 @@ class _TaarifaFormState extends State<TaarifaForm> {
                                     children: <Widget>[
                                       Container(
                                         margin: EdgeInsets.only(top: 10),
-                                        color: Colors.white,
+                                        // color: Colors.white,
+                                        decoration: BoxDecoration(
+                                            border: Border(
+                                                bottom: BorderSide(
+                                                    color: _Pictureerror
+                                                        ? Colors.red
+                                                        : Colors.white,
+                                                    width: 1))),
                                         child: Column(
                                           children: <Widget>[
                                             Row(
@@ -819,27 +882,8 @@ class _TaarifaFormState extends State<TaarifaForm> {
                         _controllerVideo.text.length > 6
                             ? Container(
                                 padding: EdgeInsets.only(top: 10),
-                                child: Chewie(
-                                  videoCtr,
-                                  aspectRatio: 3 / 2,
-                                  autoInitialize: true,
-                                  // autoPlay: true,
-                                  // looping: false,
-
-                                  // Try playing around with some of these other options:
-                                  // showControls: false,
-                                  materialProgressColors:
-                                      new ChewieProgressColors(
-                                    playedColor: Colors.red,
-                                    handleColor: Colors.blue,
-                                    backgroundColor: Colors.grey,
-                                    bufferedColor: Colors.lightGreen,
-                                  ),
-                                  placeholder: new Container(
-                                    color: Colors.grey,
-                                  ),
-                                  // autoInitialize: true,
-                                ),
+                                child: VideoWidget(
+                                    controllerVideo: _controllerVideo),
                               )
                             : Container(),
                         FormField(

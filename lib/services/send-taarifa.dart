@@ -47,17 +47,20 @@ class ApiHelper {
         if (f == 'video') {
           if (val['form']['video'].startsWith('https:') == false &&
               val['form']['video'].toString().length > 10) {
-            var res = await _uploadFunc
-                .uploadvideo(File(val['form']['video']), 'videos')
-                .catchError((onError) => {
-                      Flushbar(
-                        title: "Fail to upload video",
-                        message: onError.toString(),
-                        duration: Duration(seconds: 5),
-                      )..show(context)
-                    });
-            print(res);
-            return val['form']['video'] = res;
+            try {
+              var res = await _uploadFunc.uploadvideo(
+                  File(val['form']['video']), 'videos');
+              // .catchError((onError) => {});
+              print(res);
+              return val['form']['video'] = res;
+            } catch (e) {
+              print(e);
+              Flushbar(
+                title: "Fail to upload video",
+                message: e.toString(),
+                duration: Duration(seconds: 5),
+              )..show(context);
+            }
           }
         }
         if (f == 'picha') {
@@ -68,6 +71,7 @@ class ApiHelper {
             var res = await _uploadFunc
                 .uploadvideo(File(val['form']['picha']), 'images')
                 .catchError((onError) => {
+                      print(onError),
                       Flushbar(
                         title: "Fail to upload picture",
                         message: onError.toString(),
@@ -116,11 +120,11 @@ class ApiHelper {
           "mkoa": mkoa,
           "aina": aina,
           "wilaya": wilaya,
-          "wadi":wadi,
+          "wadi": wadi,
           'barabara': val['form']['barabara'],
           "maelezo": val['form']['maelezo'],
           "number": val['form']['number'],
-          "kazi":val['form']['kazi'],
+          "kazi": val['form']['kazi'],
           "picha": val['form']['picha'],
           "video": val['form']['video']
         },
@@ -132,10 +136,12 @@ class ApiHelper {
       print(dt);
       print('------------------  you ---------------------');
       print(val);
-      response = await dio.post('${_connect.baseUrl}/request.php?action=register-service',
-          data: body,
-          options:
-              new Options(contentType: ContentType.parse("application/json")));
+      response = await dio.post(
+        '${_connect.baseUrl}/request.php?action=register-service',
+        data: body,
+        // options:
+        //     new Options(contentType: ContentType.parse("application/json"))
+      );
       final int statusCode = response.statusCode;
       if (statusCode < 200 || statusCode > 400 || json == null) {
         throw new Exception("Error while upload  data");
@@ -252,11 +258,11 @@ class ApiHelper {
           "mkoa": mkoa,
           "aina": aina,
           "wilaya": wilaya,
-          "wadi":wadi,
+          "wadi": wadi,
           'barabara': val['form']['barabara'],
           "maelezo": val['form']['maelezo'],
           "number": val['form']['number'],
-          "kazi":val['form']['kazi'],
+          "kazi": val['form']['kazi'],
           "picha": val['form']['picha'],
           "video": val['form']['video']
         },
@@ -265,10 +271,12 @@ class ApiHelper {
       val['status'] = true;
       Response response;
       Map<String, dynamic> body = dt;
-      response = await dio.post('${_connect.baseUrl}/request.php?action=register-service',
-          data: body,
-          options:
-              new Options(contentType: ContentType.parse("application/json")));
+      response = await dio.post(
+        '${_connect.baseUrl}/request.php?action=register-service',
+        data: body,
+        // options:
+        //     new Options(contentType: ContentType.parse("application/json"))
+      );
       final int statusCode = response.statusCode;
       if (statusCode < 200 || statusCode > 400 || json == null) {
         throw new Exception("Error while upload  data");
